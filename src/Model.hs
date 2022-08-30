@@ -76,11 +76,11 @@ interp_expr (AppR m n) g = interp_expr m g $ interp_expr n g
 interp_expr (Trace c i) g = g (c, i)
 interp_expr (Bind i c e) g = \x -> interp_expr e $ \case
   (c', i') -> case eqCats c c' of
-                Just Refl -> x
+                Just Refl -> if i' == i then x else g (c', i')
                 Nothing -> g (c', i')
 interp_expr (Scope m k) g = interp_expr m g >>= interp_expr k g
 interp_expr (Lift m) g = return $ interp_expr m g
 
 -- >>> :set -XLambdaCase -XEmptyCase
--- >>> interp_expr if_brother_wetsuit1 (\case)
--- Just True
+-- >>> interp_expr if_brother_wetsuit2 (\case)
+-- Nothing

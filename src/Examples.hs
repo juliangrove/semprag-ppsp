@@ -32,4 +32,17 @@ theo_has_brother :: Expr 'T
 theo_has_brother = Lex Theo `AppL` Lex Has_a_brother
 
 if_brother_wetsuit1 :: Expr ('Effectful 'T)
-if_brother_wetsuit1 = Lex If `AppR` Lift theo_has_brother `AppR` theo_bring_wetsuit1
+if_brother_wetsuit1 =
+  Lex If `AppR` Lift theo_has_brother `AppR` theo_bring_wetsuit1
+
+if_brother_wetsuit2 :: Expr ('Effectful 'T)
+if_brother_wetsuit2 =
+  theo_bring_wetsuit2
+  `Scope` Bind 2 (EffectfulW TW)
+  (Lex If `AppR` Lift theo_has_brother `AppR` Trace (EffectfulW TW) 2)
+
+if_brother_wetsuit3 :: Expr ('Effectful 'T)
+if_brother_wetsuit3 =
+  Lift theo_bring_wetsuit1
+  `Scope` Bind 2 (EffectfulW TW)
+  (Lex If `AppR` Lift theo_has_brother `AppR` Trace (EffectfulW TW) 2)
