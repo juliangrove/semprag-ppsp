@@ -1,0 +1,19 @@
+cabal-version:       >=1.10
+name:                semprag-ppsp
+version:             0.1.0.0
+synopsis:            Code for `Presupposition projection as a scope phenomenon'.
+description:         
+-- license:             MIT
+-- license-file:        LICENSE
+author:              Julian Grove
+maintainer:          julian.grove@gmail.com
+-- copyright:           2022
+build-type:          Simple
+
+library 
+  exposed-modules: Examples
+                   Grammar
+                   Model
+  hs-source-dirs: src
+  build-depends: base
+  default-language: Haskell2010
