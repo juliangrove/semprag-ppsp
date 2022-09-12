@@ -4,6 +4,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Model where
 
@@ -30,15 +31,15 @@ theo = Ent 1
 
 -- | 1-place preds
 bro, suit :: Entity -> Bool
-bro x = False
+bro _ = False
 suit = \case
   Ent 5 -> True
   _ -> False
 
 -- | 2-place preds
 bring, have :: Entity -> Entity -> Bool
-bring x y = False
-have x y = False
+bring _ _ = False
+have _ _ = False
 
 -- | connectives
 if' :: Maybe Bool -> Maybe Bool -> Maybe Bool
@@ -57,30 +58,39 @@ type family Semtype (c :: Cat) where
   Semtype (a \\ b) = Semtype a -> Semtype b
   Semtype (a // b) = Semtype b -> Semtype a
   Semtype (Effectful a) = Maybe (Semtype a)
+  Semtype (Evaluated a) = Maybe (Semtype a)
   Semtype (Bound a b) = Semtype a -> Semtype b
 
-interp_word :: Word c -> Semtype c
-interp_word = \case
+interpWord :: Word c -> Semtype c
+interpWord = \case
   Has_a_brother -> bro
   Brings -> bring
   Theo -> theo
   His_wetsuit -> iota (\x -> suit x && have x theo)
   If -> if'
 
-interp_expr :: Expr c
-       -> (forall (c' :: Cat).(CatWitness c', Int) -> Semtype c')
-       -> Semtype c
-interp_expr (Lex w) g = interp_word w
-interp_expr (AppL m n) g = interp_expr n g $ interp_expr m g
-interp_expr (AppR m n) g = interp_expr m g $ interp_expr n g
-interp_expr (Trace c i) g = g (c, i)
-interp_expr (Bind i c e) g = \x -> interp_expr e $ \case
-  (c', i') -> case eqCats c c' of
-                Just Refl -> if i' == i then x else g (c', i')
-                Nothing -> g (c', i')
-interp_expr (Scope m k) g = interp_expr m g >>= interp_expr k g
-interp_expr (Lift m) g = return $ interp_expr m g
-
+interpExpr :: (forall (c' :: Cat).(CatWitness c', Int) -> Semtype c')
+           -> Expr c -> Semtype c
+interpExpr g = \case
+  Lex (interpWord -> w) -> w
+  AppL (iwg -> m) (iwg -> n) -> n m
+  AppR (iwg -> m) (iwg -> n) -> m n
+  Trace c i -> g (c, i)
+  Bind i c e -> \x ->
+    let g' :: (CatWitness c', Int) -> Semtype c'
+        g' (c', i') = case eqCats c c' of
+                        Just Refl -> if i' == i
+                                     then x
+                                     else g (c', i')
+                        Nothing -> g (c', i')
+    in interpExpr g' e
+  Scope1 (iwg -> m) (iwg -> k) -> m >>= k
+  Scope2 (iwg -> m) (iwg -> k) -> m >>= k
+  Lift (iwg -> v) -> pure v
+  Eval (iwg -> m) -> m
+  where iwg :: Expr c -> Semtype c
+        iwg = interpExpr g
+        
 -- >>> :set -XLambdaCase -XEmptyCase
--- >>> interp_expr if_brother_wetsuit2 (\case)
--- Nothing
+-- >>> interpExpr (\case) if_brother_wetsuit3
+-- Just True

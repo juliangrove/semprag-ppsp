@@ -14,6 +14,7 @@ data Cat = N | V | D | T | C
          | Cat :\: Cat
          | Cat :/: Cat
          | Effectful Cat
+         | Evaluated Cat
          | Bound Cat Cat
   deriving (Eq, Show)
 
@@ -29,6 +30,7 @@ data CatWitness (c :: Cat) where
   (::\::) :: CatWitness a -> CatWitness b -> CatWitness (a \\ b)
   (::/::) :: CatWitness a -> CatWitness b -> CatWitness (a // b)
   EffectfulW :: CatWitness a -> CatWitness (Effectful a)
+  EvaluatedW :: CatWitness 'T -> CatWitness (Evaluated 'T)
   BoundW :: CatWitness a -> CatWitness b -> CatWitness (Bound a b)
 
 
@@ -65,13 +67,30 @@ a \\ b = a ::\:: b
 a // b = a ::/:: b
 
 data Word (c :: Cat) = Word (CatWitness c) String
+instance Show (Word c) where show (Word _ s) = s
+
 data Expr (c :: Cat) where
   Lex :: Word c -> Expr c
   AppL :: Expr a -> Expr (a \\ b) -> Expr b
   AppR :: Expr (a // b) -> Expr b -> Expr a
   Trace :: CatWitness c -> Int -> Expr c
   Bind :: Int -> CatWitness c' -> Expr c -> Expr (Bound c' c)
-  Scope :: Expr (Effectful c')
-        -> Expr (Bound c' (Effectful c))
-        -> Expr (Effectful c)
+  Scope1 :: Expr (Effectful c')
+         -> Expr (Bound c' (Effectful c))
+         -> Expr (Effectful c)
+  Scope2 :: Expr (Effectful c')
+         -> Expr (Bound c' (Evaluated 'T))
+         -> Expr (Evaluated 'T)
   Lift :: Expr c -> Expr (Effectful c)
+  Eval :: Expr (Effectful 'T) -> Expr (Evaluated 'T)
+
+instance Show (Expr c) where
+  show (Lex w) = show w
+  show (e0 `AppL` e1) = "[ " ++ show e0 ++ " " ++ show e1 ++ " ]"
+  show (e0 `AppR` e1) = "[ " ++ show e0 ++ " " ++ show e1 ++ " ]"
+  show (Trace _ i) = "t" ++ show i
+  show (Bind i _ e) = "[λ" ++ show i ++ " " ++ show e ++ " ]"
+  show (Scope1 e0 e1) = "[ " ++ show e0 ++ " " ++ show e1 ++ " ]"
+  show (Scope2 e0 e1) = "[ " ++ show e0 ++ " " ++ show e1 ++ " ]"
+  show (Lift e) = "[η " ++ show e ++ " ]"
+  show (Eval e) = "[↓ " ++ show e ++ " ]"

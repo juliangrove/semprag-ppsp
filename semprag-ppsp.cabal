@@ -14,6 +14,8 @@ library
   exposed-modules: Examples
                    Grammar
                    Model
+                   Terms
+                   Translation
   hs-source-dirs: src
   build-depends: base
   default-language: Haskell2010
