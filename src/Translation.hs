@@ -88,8 +88,8 @@ interpExpr :: forall γ c.
            -> Expr c -> γ ⊢ Semtype c
 interpExpr g = \case
   Lex (interpWord -> w) -> w
-  AppL (iwg -> m) (iwg -> n) -> n @@ m
-  AppR (iwg -> m) (iwg -> n) -> m @@ n
+  AppL (ieg -> m) (ieg -> n) -> n @@ m
+  AppR (ieg -> m) (ieg -> n) -> m @@ n
   Trace c i -> g (c, i)
   Bind i (c'' :: CatWitness c'') e ->
     let g' :: (CatWitness c', Int) -> γ × (Semtype c'') ⊢ Semtype c'
@@ -99,12 +99,12 @@ interpExpr g = \case
                                      else wkn (g (c', i'))
                         Nothing -> wkn (g (c', i'))
     in Lam (interpExpr g' e)
-  Scope1 (iwg -> m) (iwg -> k) -> m `bind1` k
-  Scope2 (iwg -> m) (iwg -> k) -> m `bind1` k
-  Lift (iwg -> v) -> pure1 v
-  Eval (iwg -> m) -> eval1 m
-  where iwg :: Expr c' -> γ ⊢ Semtype c'
-        iwg = interpExpr g
+  Scope1 (ieg -> m) (ieg -> k) -> m `bind1` k
+  Scope2 (ieg -> m) (ieg -> k) -> m `bind1` k
+  Lift (ieg -> v) -> pure1 v
+  Eval (ieg -> m) -> eval1 m
+  where ieg :: Expr c' -> γ ⊢ Semtype c'
+        ieg = interpExpr g
           
 -- >>> :set -XLambdaCase -XEmptyCase
 -- >>> betaReduce $ interpExpr (\case) if_brother_wetsuit1

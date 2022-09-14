@@ -73,8 +73,8 @@ interpExpr :: (forall (c' :: Cat).(CatWitness c', Int) -> Semtype c')
            -> Expr c -> Semtype c
 interpExpr g = \case
   Lex (interpWord -> w) -> w
-  AppL (iwg -> m) (iwg -> n) -> n m
-  AppR (iwg -> m) (iwg -> n) -> m n
+  AppL (ieg -> m) (ieg -> n) -> n m
+  AppR (ieg -> m) (ieg -> n) -> m n
   Trace c i -> g (c, i)
   Bind i c e -> \x ->
     let g' :: (CatWitness c', Int) -> Semtype c'
@@ -84,9 +84,9 @@ interpExpr g = \case
                                      else g (c', i')
                         Nothing -> g (c', i')
     in interpExpr g' e
-  Scope1 (iwg -> m) (iwg -> k) -> m >>= k
-  Scope2 (iwg -> m) (iwg -> k) -> m >>= k
-  Lift (iwg -> v) -> pure v
-  Eval (iwg -> m) -> m
-  where iwg :: Expr c -> Semtype c
-        iwg = interpExpr g
+  Scope1 (ieg -> m) (ieg -> k) -> m >>= k
+  Scope2 (ieg -> m) (ieg -> k) -> m >>= k
+  Lift (ieg -> v) -> pure v
+  Eval (ieg -> m) -> m
+  where ieg :: Expr c -> Semtype c
+        ieg = interpExpr g
