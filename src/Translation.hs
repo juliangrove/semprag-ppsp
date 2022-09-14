@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -82,6 +81,7 @@ interpWord = \case
                  (Con Suit @@ Var Get @@ Var (Weaken Get)) @@
                  (Con Have @@ Var Get @@ Con Te.Theo @@ Var (Weaken Get)))))
   If -> if'
+  w -> error $ "can't interpret " ++ show w
 
 interpExpr :: forall γ c.
               (forall (c' :: Cat).(CatWitness c', Int) -> γ ⊢ Semtype c')
@@ -91,14 +91,14 @@ interpExpr g = \case
   AppL (iwg -> m) (iwg -> n) -> n @@ m
   AppR (iwg -> m) (iwg -> n) -> m @@ n
   Trace c i -> g (c, i)
-  Bind i (c :: CatWitness c'') e -> Lam $
+  Bind i (c'' :: CatWitness c'') e ->
     let g' :: (CatWitness c', Int) -> γ × (Semtype c'') ⊢ Semtype c'
-        g' (c', i') = case eqCats c c' of
+        g' (c', i') = case eqCats c' c'' of
                         Just Refl -> if i' == i
                                      then Var Get
                                      else wkn (g (c', i'))
                         Nothing -> wkn (g (c', i'))
-    in interpExpr g' e
+    in Lam (interpExpr g' e)
   Scope1 (iwg -> m) (iwg -> k) -> m `bind1` k
   Scope2 (iwg -> m) (iwg -> k) -> m `bind1` k
   Lift (iwg -> v) -> pure1 v
@@ -106,15 +106,28 @@ interpExpr g = \case
   where iwg :: Expr c' -> γ ⊢ Semtype c'
         iwg = interpExpr g
           
--- >>> :set -XLambdaCase -XEmptyCase -W
--- >>> betaReduce $ interpExpr (\case) if_brother_wetsuit1
--- <interactive>:371:27: warning: [-Wincomplete-patterns]
+-- >>> :set -XLambdaCase -XEmptyCase -XGADTs
+-- >>> betaReduce $ interpExpr (\case (EvaluatedW TW, y) -> interpExpr (\case) $ Eval theo_bring_wetsuit1) if_brother_wetsuit2
+-- <interactive>:500:27-99: warning: [-Wincomplete-patterns]
+--     Pattern match(es) are non-exhaustive
+--     In a case alternative:
+--         Patterns not matched:
+--             (NW, _)
+--             (VW, _)
+--             (DW, _)
+--             (TW, _)
+--             ...
+-- <interactive>:500:49: warning: [-Wunused-matches]
+--     Defined but not used: ‘y’
+-- <interactive>:500:67: warning: [-Wincomplete-patterns]
 --     Pattern match(es) are non-exhaustive
 --     In a case alternative: Patterns not matched: (_, _)
--- (λx.([bro(t)(x)] ⇒ (match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [bring(y)(t)]; # => #) with [y] => [y(x)]; # => #)))
+-- (λx.(match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [(λz.[bring(y)(t)(z)])]; # => #) with [y] => ([bro(t)(x)] ⇒ (match (match (ιz : (suit(z)(x) ∧ have(z)(t)(x))) with [z] => [bring(z)(t)]; # => #) with [z] => [z(x)]; # => #)); # => #))
 
+-- >>> if_brother_wetsuit2
+-- [ [ his wetsuit [λ1 [η [↓ [η [ theo [ will bring t1 ] ] ] ] ] ] ] [λ2 [ [ if [↓ [η [ theo has a brother ] ] ] ] t2 ] ] ]
 
--- (λx.(match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [(λz.[bring(y)(t)(z)])]; # => #) with [y] => ([bro(t)(x)] ⇒ *** Exception: <interactive>:891:49: Non-exhaustive patterns in case
-
--- >>> :t theo_bring_wetsuit2
--- theo_bring_wetsuit2 :: Expr ('Effectful ('Evaluated 'Gr.T))
+-- >>> betaReduce $ interpExpr (\case _ -> error "bad") if_brother_wetsuit3
+-- (λx.([bro(t)(x)] ⇒ *** Exception: bad
+-- CallStack (from HasCallStack):
+--   error, called at <interactive>:792:38 in interactive:Ghci1

@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TypeOperators #-}
 
 module Examples where
 
@@ -21,13 +20,19 @@ pattern If = Word ((EvaluatedW TW ::/:: EvaluatedW TW) ::/:: EvaluatedW TW) "if"
 theo_bring_wetsuit1 :: Expr ('Effectful 'T)
 theo_bring_wetsuit1 =
   Lex His_wetsuit
-  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))
-
+  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))  
+                           
 theo_bring_wetsuit2 :: Expr ('Effectful ('Evaluated 'T))
 theo_bring_wetsuit2 =
   Lex His_wetsuit
   `Scope1` Bind 1 DW
   (Lift (Eval (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))))
+
+theo_bring_wetsuit2' :: Expr ('Evaluated 'T)
+theo_bring_wetsuit2' =
+  Lex His_wetsuit
+  `Scope2` Bind 1 DW
+  (Eval (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1)))))
 
 theo_has_brother :: Expr 'T
 theo_has_brother = Lex Theo `AppL` Lex Has_a_brother

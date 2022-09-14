@@ -1,9 +1,8 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase#-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -57,8 +56,7 @@ data Con α where
   Suit :: Con ('E ⟶ 'I ⟶ 'T)
   Bring :: Con ('E ⟶ 'E ⟶ 'I ⟶ 'T)
   Have :: Con ('E ⟶ 'E ⟶ 'I ⟶ 'T)
-  Map :: Con ((α ⟶ β) ⟶ 'Maybe α ⟶ 'Maybe β)
-
+  
 -- | Well-typed terms.
 data γ ⊢ α where
   Var :: α ∈ γ -> γ ⊢ α
@@ -119,7 +117,6 @@ instance Show (Con α) where
   show Bring = "bring"
   show Have = "have"
   show Theo = "t"
-  show Map = "map"
 
 lft :: (α ∈ γ -> α ∈ δ) -> α ∈ (γ × β) -> α ∈ (δ × β)
 lft f = \case
@@ -224,7 +221,7 @@ substNF (NFLam m) f = NFLam $ substNF m $ \case
   Weaken i -> wknNF $ f i
 substNF (NFPair m n) f = NFPair (substNF m f) (substNF n f)
 substNF (NFDefined m) f = NFDefined (substNF m f)
-substNF NFUndefined f = NFUndefined
+substNF NFUndefined _ = NFUndefined
 substNF (Neu m) f = substNeu m f
 
 substNF0 :: NF (γ × α) β -> NF γ α -> NF γ β

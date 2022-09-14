@@ -1,8 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -32,10 +30,12 @@ data CatWitness (c :: Cat) where
   EffectfulW :: CatWitness a -> CatWitness (Effectful a)
   EvaluatedW :: CatWitness 'T -> CatWitness (Evaluated 'T)
   BoundW :: CatWitness a -> CatWitness b -> CatWitness (Bound a b)
+deriving instance Show (CatWitness c)
 
 
 data EqCats (c :: Cat) (c' :: Cat) where
   Refl :: EqCats c c
+deriving instance Show (EqCats c c')
 
 eqCats :: CatWitness c -> CatWitness c' -> Maybe (EqCats c c')
 eqCats NW NW = Just Refl
@@ -62,6 +62,8 @@ eqCats (BoundW a b) (BoundW c d) = case eqCats a c of
                                                     _ -> Nothing
                                      _ -> Nothing
 eqCats _ _ = Nothing
+
+
 
 a \\ b = a ::\:: b
 a // b = a ::/:: b
