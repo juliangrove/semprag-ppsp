@@ -18,40 +18,37 @@ pattern If = Word ((EvaluatedW TW ::/:: EvaluatedW TW) ::/:: EvaluatedW TW) "if"
 -- | example derivations
 
 theo_bring_wetsuit1 :: Expr ('Effectful 'T)
-theo_bring_wetsuit1 =
+theo_bring_wetsuit1 = 
   Lex His_wetsuit
-  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))  
-                           
-theo_bring_wetsuit2 :: Expr ('Effectful ('Evaluated 'T))
+  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))
+
+theo_bring_wetsuit2 :: Expr ('Effectful ('Effectful 'T))
 theo_bring_wetsuit2 =
   Lex His_wetsuit
   `Scope1` Bind 1 DW
-  (Lift (Eval (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))))
-
-theo_bring_wetsuit2' :: Expr ('Evaluated 'T)
-theo_bring_wetsuit2' =
-  Lex His_wetsuit
-  `Scope2` Bind 1 DW
-  (Eval (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1)))))
+  (Lift (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1)))))
 
 theo_has_brother :: Expr 'T
 theo_has_brother = Lex Theo `AppL` Lex Has_a_brother
 
 if_brother_wetsuit1 :: Expr ('Evaluated 'T)
 if_brother_wetsuit1 =
-  Lex If `AppR` Eval (Lift theo_has_brother) `AppR` Eval theo_bring_wetsuit1
+  Lex If `AppR` -- if
+  Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
+  Eval theo_bring_wetsuit1            -- he'll bring his wetsuit
 
 if_brother_wetsuit2 :: Expr ('Evaluated 'T)
 if_brother_wetsuit2 =
-  theo_bring_wetsuit2
-  `Scope2` Bind 2 (EvaluatedW TW)
-  (Lex If `AppR` Eval (Lift theo_has_brother) `AppR` Trace (EvaluatedW TW) 2)
+  theo_bring_wetsuit2 -- he'll bring his wetsuit
+  `Scope2` Bind 2 (EffectfulW TW)
+  (Lex If `AppR` -- if
+   Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
+   Eval (Trace (EffectfulW TW) 2))     -- trace
 
 if_brother_wetsuit3 :: Expr ('Evaluated 'T)
 if_brother_wetsuit3 =
-  Lift (Eval theo_bring_wetsuit1)
-  `Scope2` Bind 2 (EvaluatedW TW)
-  (Lex If `AppR` Eval (Lift theo_has_brother) `AppR` Trace (EvaluatedW TW) 2)
-
--- >>> if_brother_wetsuit2
--- [ [ his wetsuit [λ1 [η [↓ [η [ theo [ will bring t1 ] ] ] ] ] ] ] [λ2 [ [ if [↓ [η [ theo has a brother ] ] ] ] t2 ] ] ]
+  Lift theo_bring_wetsuit1 -- he'll bring his wetsuit
+  `Scope2` Bind 2 (EffectfulW TW)
+  (Lex If `AppR` -- if
+   Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
+   Eval (Trace (EffectfulW TW) 2))     -- trace

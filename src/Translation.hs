@@ -106,28 +106,9 @@ interpExpr g = \case
   where iwg :: Expr c' -> γ ⊢ Semtype c'
         iwg = interpExpr g
           
--- >>> :set -XLambdaCase -XEmptyCase -XGADTs
--- >>> betaReduce $ interpExpr (\case (EvaluatedW TW, y) -> interpExpr (\case) $ Eval theo_bring_wetsuit1) if_brother_wetsuit2
--- <interactive>:500:27-99: warning: [-Wincomplete-patterns]
---     Pattern match(es) are non-exhaustive
---     In a case alternative:
---         Patterns not matched:
---             (NW, _)
---             (VW, _)
---             (DW, _)
---             (TW, _)
---             ...
--- <interactive>:500:49: warning: [-Wunused-matches]
---     Defined but not used: ‘y’
--- <interactive>:500:67: warning: [-Wincomplete-patterns]
---     Pattern match(es) are non-exhaustive
---     In a case alternative: Patterns not matched: (_, _)
--- (λx.(match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [(λz.[bring(y)(t)(z)])]; # => #) with [y] => ([bro(t)(x)] ⇒ (match (match (ιz : (suit(z)(x) ∧ have(z)(t)(x))) with [z] => [bring(z)(t)]; # => #) with [z] => [z(x)]; # => #)); # => #))
+-- >>> :set -XLambdaCase -XEmptyCase
+-- >>> betaReduce $ interpExpr (\case) if_brother_wetsuit1
+-- (λx.([bro(t)(x)] ⇒ (match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [bring(y)(t)]; # => #) with [y] => [y(x)]; # => #)))
 
--- >>> if_brother_wetsuit2
--- [ [ his wetsuit [λ1 [η [↓ [η [ theo [ will bring t1 ] ] ] ] ] ] ] [λ2 [ [ if [↓ [η [ theo has a brother ] ] ] ] t2 ] ] ]
-
--- >>> betaReduce $ interpExpr (\case _ -> error "bad") if_brother_wetsuit3
--- (λx.([bro(t)(x)] ⇒ *** Exception: bad
--- CallStack (from HasCallStack):
---   error, called at <interactive>:792:38 in interactive:Ghci1
+-- >>> if_brother_wetsuit3
+-- [ [η [ his wetsuit [λ1 [η [ theo [ will bring t1 ] ] ] ] ] ] [λ2 [ [ if [↓ [η [ theo has a brother ] ] ] ] [↓ t2 ] ] ] ]

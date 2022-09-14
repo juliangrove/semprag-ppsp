@@ -90,7 +90,3 @@ interpExpr g = \case
   Eval (iwg -> m) -> m
   where iwg :: Expr c -> Semtype c
         iwg = interpExpr g
-        
--- >>> :set -XLambdaCase -XEmptyCase
--- >>> interpExpr (\case) if_brother_wetsuit3
--- Just True

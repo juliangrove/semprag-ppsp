@@ -56,6 +56,9 @@ eqCats (a ::/:: b) (c ::/:: d) = case eqCats a c of
 eqCats (EffectfulW c) (EffectfulW c') = case eqCats c c' of
                                           Just Refl -> Just Refl
                                           _ -> Nothing
+eqCats (EvaluatedW c) (EvaluatedW c') = case eqCats c c' of
+                                          Just Refl -> Just Refl
+                                          _ -> Nothing
 eqCats (BoundW a b) (BoundW c d) = case eqCats a c of
                                      Just Refl -> case eqCats b d of
                                                     Just Refl -> Just Refl
