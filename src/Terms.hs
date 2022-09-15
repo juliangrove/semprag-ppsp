@@ -1,8 +1,6 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase#-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -52,10 +50,17 @@ data Con α where
   Equals :: Con (α ⟶ α ⟶ 'T)
   -- Non-logical constants
   Theo :: Con 'E
+  Mary :: Con 'E
+  John :: Con 'E
+  MaryPnts :: Con 'E
   Bro :: Con ('E ⟶ 'I ⟶ 'T)
   Suit :: Con ('E ⟶ 'I ⟶ 'T)
+  InBed :: Con ('E ⟶ 'I ⟶ 'T)
   Bring :: Con ('E ⟶ 'E ⟶ 'I ⟶ 'T)
   Have :: Con ('E ⟶ 'E ⟶ 'I ⟶ 'T)
+  Lose :: Con ('E ⟶ 'E ⟶ 'I ⟶ 'T)
+  Dox :: Con ('E ⟶ 'I ⟶ 'I ⟶ 'T)
+  Delta :: Con ('T ⟶ 'Maybe 'T)
   
 -- | Well-typed terms.
 data γ ⊢ α where
@@ -88,8 +93,7 @@ data Neutral γ α where
   NeuSnd :: Neutral γ (α × β) -> Neutral γ β
   NeuTT :: Neutral γ 'Unit
   NeuMatch :: Neutral γ ('Maybe α)
-           -> NF (γ × α) β -> NF γ β -> Neutral γ β
-  
+           -> NF (γ × α) β -> NF γ β -> Neutral γ β 
   
 -- | Terms in normal form.
 data NF γ α where
@@ -113,10 +117,17 @@ instance Show (Con α) where
   show Iota = "ι"
   show Equals = "(=)"
   show Suit = "suit"
+  show InBed = "inBed"
   show Bro = "bro"
   show Bring = "bring"
+  show Lose = "lose"
   show Have = "have"
   show Theo = "t"
+  show Mary = "m"
+  show John = "j"
+  show MaryPnts = "pnts(m)"
+  show Dox = "dox"
+  show Delta = "δ"
 
 lft :: (α ∈ γ -> α ∈ δ) -> α ∈ (γ × β) -> α ∈ (δ × β)
 lft f = \case
@@ -333,7 +344,6 @@ printTerm fs ρ t =
                                      Get -> fresh
                                      Weaken x -> ρ x)
                   n ++ "; # => " ++ o ++ ")"
-  
 
 instance Show (γ ⊢ α) where
   show t = printTerm freshes (\case) t

@@ -12,6 +12,10 @@ import Examples
 import Grammar
 import Prelude hiding (Word)
 
+
+--------------------------------------------------------------------------------
+-- | Interpretations of examples into an extensional model
+
 data Entity = Ent Int deriving (Eq, Show)
 instance Enum Entity where
   toEnum n = Ent n

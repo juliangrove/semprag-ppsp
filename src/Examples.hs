@@ -7,48 +7,72 @@ module Examples where
 import Grammar
 import Prelude hiding (Word)
 
--- | example lexicon
 
+--------------------------------------------------------------------------------
+-- | Lexicon and examples from paper
+
+-- | example lexicon
 pattern Has_a_brother = Word (DW ::\:: TW) "has a brother"
 pattern Brings = Word ((DW ::\:: TW) ::/:: DW) "will bring"
-pattern Theo = Word DW "theo"
+pattern Lost = Word ((DW ::\:: TW) ::/:: DW) "lost"
+pattern Theo = Word DW "Theo"
+pattern John = Word DW "John"
+pattern Mary = Word DW "Mary"
+pattern Mary's_parents = Word DW "Mary's parents"
 pattern His_wetsuit = Word (EffectfulW DW) "his wetsuit"
-pattern If = Word ((EvaluatedW TW ::/:: EvaluatedW TW) ::/:: EvaluatedW TW) "if"
+pattern If = Word ((EvaluatedW TW ::/:: EffectfulW TW) ::/:: EffectfulW TW) "if"
+pattern Believes = Word ((DW ::\:: EvaluatedW TW) ::/:: EvaluatedW TW) "believes"
+pattern Also = Word ((DW ::\:: EffectfulW TW) ::/:: (DW ::\:: TW)) "also"
+pattern In_bed = Word (DW ::\:: TW) "is in bed"
 
 -- | example derivations
 
-theo_bring_wetsuit1 :: Expr ('Effectful 'T)
-theo_bring_wetsuit1 = 
-  Lex His_wetsuit
-  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))
+figure5 :: Expr ('Evaluated 'T)
+figure5 =
+  Lex If `AppR` Lift (Lex Theo `AppL` Lex Has_a_brother) `AppR` -- if Theo has a brother
+  (Lex His_wetsuit                                              -- he'll bring his wetsuit
+  `Scope1` Bind 1 DW (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1)))))
 
-theo_bring_wetsuit2 :: Expr ('Effectful ('Effectful 'T))
-theo_bring_wetsuit2 =
-  Lex His_wetsuit
+figure6 :: Expr ('Evaluated 'T)
+figure6 =
+  (Lex His_wetsuit -- he'll bring his wetsuit
   `Scope1` Bind 1 DW
-  (Lift (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1)))))
-
-theo_has_brother :: Expr 'T
-theo_has_brother = Lex Theo `AppL` Lex Has_a_brother
-
-if_brother_wetsuit1 :: Expr ('Evaluated 'T)
-if_brother_wetsuit1 =
-  Lex If `AppR` -- if
-  Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
-  Eval theo_bring_wetsuit1            -- he'll bring his wetsuit
-
-if_brother_wetsuit2 :: Expr ('Evaluated 'T)
-if_brother_wetsuit2 =
-  theo_bring_wetsuit2 -- he'll bring his wetsuit
+  (Lift (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))))
   `Scope2` Bind 2 (EffectfulW TW)
-  (Lex If `AppR` -- if
-   Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
-   Eval (Trace (EffectfulW TW) 2))     -- trace
+  (Lex If `AppR` Lift (Lex Theo `AppL` Lex Has_a_brother) `AppR` -- if Theo has a brother
+   Trace (EffectfulW TW) 2)                                      -- trace
 
-if_brother_wetsuit3 :: Expr ('Evaluated 'T)
-if_brother_wetsuit3 =
-  Lift theo_bring_wetsuit1 -- he'll bring his wetsuit
+reconstruction_example :: Expr ('Evaluated 'T)
+reconstruction_example =
+  (Lift (Lex His_wetsuit -- he'll bring his wetsuit
+  `Scope1` Bind 1 DW
+  (Lift (Lex Theo `AppL` (Lex Brings `AppR` (Trace DW 1))))))
   `Scope2` Bind 2 (EffectfulW TW)
-  (Lex If `AppR` -- if
-   Eval (Lift theo_has_brother) `AppR` -- Theo has a brother
-   Eval (Trace (EffectfulW TW) 2))     -- trace
+  (Lex If `AppR` Lift (Lex Theo `AppL` Lex Has_a_brother) `AppR` -- if Theo has a brother
+   Trace (EffectfulW TW) 2)                                      -- trace
+
+figure9 :: Expr ('Evaluated 'T)
+figure9 =
+  Lex Theo `AppL` (Lex Believes `AppR` Eval -- Theo believes
+                   (Lex His_wetsuit -- he lost his wetsuit
+                    `Scope1` Bind 1 DW
+                    (Lift (Lex Theo `AppL` (Lex Lost `AppR` (Trace DW 1))))))
+
+figure10 :: Expr ('Evaluated 'T)
+figure10 =
+  (Lex His_wetsuit -- he lost his wetsuit
+  `Scope1` Bind 1 DW
+  (Lift (Lex Theo `AppL` (Lex Lost `AppR` (Trace DW 1)))))
+  `Scope2` Bind 2 TW
+  (Lex Theo `AppL` (Lex Believes `AppR` Eval (Lift (Trace TW 2)))) -- Theo believes trace
+
+also_narrow :: Expr ('Evaluated 'T)
+also_narrow =
+  Lex Mary's_parents `AppL` -- Mary's parents believe
+  (Lex Believes `AppR` (Eval (Lex Mary `AppL` (Lex Also `AppR` Lex In_bed)))) -- Mary is in bed
+
+also_wide :: Expr ('Evaluated 'T)
+also_wide =
+  Lex Mary `AppL` (Lex Also `AppR` Lex In_bed) -- Mary is in bed
+  `Scope2` Bind 1 TW
+  (Lex Mary's_parents `AppL` (Lex Believes `AppR` (Eval (Lift (Trace TW 1))))) -- Mary's parents believe trace

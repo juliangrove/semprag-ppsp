@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -13,28 +12,52 @@ import Grammar as Gr
 import Prelude hiding (Word)
 import Terms as Te
 
+
+--------------------------------------------------------------------------------
+-- | Translations of examples into λ-calculus
+
 -- | entities
-theo :: γ ⊢ 'E
+theo, mary, john, mary's_parents :: γ ⊢ 'E
 theo = Con Te.Theo
+mary = Con Te.Mary
+john = Con Te.John
+mary's_parents = Con Te.MaryPnts
 
 -- | individual concepts
 his_wetsuit :: γ ⊢ ('I ⟶ 'Maybe 'E)
 his_wetsuit = Lam (Con Iota @@ (Lam (Con Suit @@ Var Get @@ Var (Weaken Get))))
 
 -- | 1-place preds
-bro, suit :: γ ⊢ ('E ⟶ 'I ⟶ 'Te.T)
+bro, suit, in_bed :: γ ⊢ ('E ⟶ 'I ⟶ 'Te.T)
 bro = Con Bro
 suit = Con Suit
+in_bed = Con InBed
 
 -- | 2-place preds
-bring, have :: γ ⊢ ('E ⟶ 'E ⟶ 'I ⟶ 'Te.T)
+bring, have, lost :: γ ⊢ ('E ⟶ 'E ⟶ 'I ⟶ 'Te.T)
 bring = Con Bring
 have = Con Have
+lost = Con Lose
+
+-- | adverbs
+also :: γ ⊢ (('E ⟶ 'I ⟶ 'Te.T) ⟶ 'E ⟶ 'I ⟶ 'Maybe ('I ⟶ 'Te.T))
+also = Lam (Lam (Lam (Match (Con Delta @@ (Var (Weaken (Weaken Get)) @@
+                                           Con Te.John @@
+                                           Var Get))
+                      (Defined (Var (Weaken (Weaken (Weaken Get))) @@
+                                Var (Weaken (Weaken Get))))
+                      Undefined)))
+
+-- >>> also
+-- (λx.(λy.(λz.(match δ(x(j)(z)) with [u] => [x(y)]; # => #))))
+
 
 -- | connectives
-if' :: γ ⊢ (('I ⟶ 'Maybe 'Te.T) ⟶ ('I ⟶ 'Maybe 'Te.T) ⟶ 'I ⟶ 'Maybe 'Te.T)
-if' = Lam (Lam (Lam (Con ImpM @@ (Var (Weaken (Weaken Get)) @@ Var Get)
-                     @@ (Var (Weaken Get) @@ Var Get))))
+if' :: γ ⊢ (('I ⟶ 'Maybe ('I ⟶ 'Te.T)) ⟶
+            ('I ⟶ 'Maybe ('I ⟶ 'Te.T)) ⟶
+             'I ⟶ 'Maybe 'Te.T)
+if' = Lam (Lam (Lam (Con ImpM @@ (eval1 (Var (Weaken (Weaken Get))) @@ Var Get)
+                     @@ (eval1 (Var (Weaken Get)) @@ Var Get))))
       
 -- | monadic stuff
 
@@ -74,13 +97,28 @@ interpWord :: Word c -> γ ⊢ (Semtype c)
 interpWord = \case
   Has_a_brother -> bro
   Brings -> bring
+  Lost -> lost
+  In_bed -> in_bed
   Ex.Theo -> theo
+  Ex.Mary -> mary
+  Ex.John -> john
+  Ex.Mary's_parents -> mary's_parents
   His_wetsuit ->
     Lam (Con Iota @@
           (Lam (Con And @@
                  (Con Suit @@ Var Get @@ Var (Weaken Get)) @@
                  (Con Have @@ Var Get @@ Con Te.Theo @@ Var (Weaken Get)))))
   If -> if'
+  Believes ->
+    Lam (Lam (Lam
+              (Con ForallM @@
+               (Lam (Con ImpM @@
+                     Defined (Con Dox @@
+                              Var (Weaken (Weaken Get)) @@
+                              Var (Weaken  Get) @@
+                              Var Get) @@
+                     (Var (Weaken (Weaken (Weaken Get))) @@ Var Get))))))
+  Also -> also
   w -> error $ "can't interpret " ++ show w
 
 interpExpr :: forall γ c.
@@ -107,8 +145,5 @@ interpExpr g = \case
         ieg = interpExpr g
           
 -- >>> :set -XLambdaCase -XEmptyCase
--- >>> betaReduce $ interpExpr (\case) if_brother_wetsuit1
--- (λx.([bro(t)(x)] ⇒ (match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [bring(y)(t)]; # => #) with [y] => [y(x)]; # => #)))
-
--- >>> if_brother_wetsuit3
--- [ [η [ his wetsuit [λ1 [η [ theo [ will bring t1 ] ] ] ] ] ] [λ2 [ [ if [↓ [η [ theo has a brother ] ] ] ] [↓ t2 ] ] ] ]
+-- >>> betaReduce $ interpExpr (\case) also_wide
+-- (λx.(match (match δ(inBed(j)(x)) with [y] => [inBed(m)]; # => #) with [y] => (∀#z : ([dox(pnts(m))(x)(z)] ⇒ [y(z)])); # => #))

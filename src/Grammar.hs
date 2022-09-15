@@ -8,6 +8,10 @@ module Grammar where
 
 import Prelude hiding (Word)
 
+
+--------------------------------------------------------------------------------
+-- | Grammatical categories and expressions
+
 data Cat = N | V | D | T | C
          | Cat :\: Cat
          | Cat :/: Cat
@@ -32,10 +36,9 @@ data CatWitness (c :: Cat) where
   BoundW :: CatWitness a -> CatWitness b -> CatWitness (Bound a b)
 deriving instance Show (CatWitness c)
 
-
+-- | Equality between categories
 data EqCats (c :: Cat) (c' :: Cat) where
   Refl :: EqCats c c
-deriving instance Show (EqCats c c')
 
 eqCats :: CatWitness c -> CatWitness c' -> Maybe (EqCats c c')
 eqCats NW NW = Just Refl
