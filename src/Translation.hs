@@ -143,3 +143,7 @@ interpExpr g = \case
   Eval (ieg -> m) -> eval1 m
   where ieg :: Expr c' -> γ ⊢ Semtype c'
         ieg = interpExpr g
+
+-- >>> :set -XLambdaCase -XEmptyCase
+-- >>> interpExpr (\case) reconstruction_example
+-- (λx.(match (λy.[(λz.(match (λu.(ιv : (suit(v)(u) ∧ have(v)(t)(u))))(z) with [u] => (λv.(λw.(λx1.[bring(w)(t)]))(v)(z))(u); # => #))])(x) with [y] => (λz.(λu.(λv.(λw.(λx1.((λy1.(match v(y1) with [z1] => [z1(y1)]; # => #))(x1) ⇒ (λy1.(match w(y1) with [z1] => [z1(y1)]; # => #))(x1)))))(λv.[bro(t)])(u))(z)(x))(y); # => #))

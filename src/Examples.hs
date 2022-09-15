@@ -77,5 +77,5 @@ also_wide =
   `Scope2` Bind 1 TW
   (Lex Mary's_parents `AppL` (Lex Believes `AppR` (Eval (Lift (Trace TW 1))))) -- Mary's parents believe trace
 
--- >>> also_narrow
--- [ Mary's parents [ believes [↓ [ Mary [ also is in bed ] ] ] ] ]
+-- >>> reconstruction_example
+-- [ [η [ his wetsuit [λ1 [η [ Theo [ will bring t1 ] ] ] ] ] ] [λ2 [ [ if [η [ Theo has a brother ] ] ] t2 ] ] ]

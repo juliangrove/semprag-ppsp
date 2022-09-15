@@ -23,4 +23,5 @@ by doing, e.g., `interpExpr (\case) figure5` (make sure to turn on LambdaCase
 and EmptyCase). All of the examples can be translated into a λ-term representing
 an intension by loading
 [Translation.hs](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Translation.hs)
-and doing the same.
+and doing the same (and β-reducing, if desired), e.g., `betaReduce $ interpExpr
+(\case) figure5`.
