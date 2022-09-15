@@ -1,7 +1,7 @@
 # grove-semprag-ppsp
 
-Code for the paper `Presupposition projection as a scope phenomenon'. Examples
-from the paper appear in
+Code for the paper [Presupposition projection as a scope
+phenomenon](https://ling.auf.net/lingbuzz/006801). Examples from the paper appear in
 [Examples.hs](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Examples.hs):
 [Figure 5,
 p. 19](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Examples.hs#L30-L34),
@@ -22,4 +22,5 @@ extensional model found in
 by doing, e.g., `interpExpr (\case) figure5` (make sure to turn on LambdaCase
 and EmptyCase). All of the examples can be translated into a λ-term representing
 an intension by loading
-[Translation.hs](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Translation.hs).
+[Translation.hs](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Translation.hs)
+and doing the same.
