@@ -1,4 +1,4 @@
-# grove-semprag-ppsp
+# semprag-ppsp
 
 Code for the paper [Presupposition projection as a scope
 phenomenon](https://ling.auf.net/lingbuzz/006801). Examples from the paper appear in
