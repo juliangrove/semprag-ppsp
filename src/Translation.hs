@@ -143,7 +143,3 @@ interpExpr g = \case
   Eval (ieg -> m) -> eval1 m
   where ieg :: Expr c' -> γ ⊢ Semtype c'
         ieg = interpExpr g
-          
--- >>> :set -XLambdaCase -XEmptyCase
--- >>> betaReduce $ interpExpr (\case) also_wide
--- (λx.(match (match δ(inBed(j)(x)) with [y] => [inBed(m)]; # => #) with [y] => (∀#z : ([dox(pnts(m))(x)(z)] ⇒ [y(z)])); # => #))

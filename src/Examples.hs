@@ -69,10 +69,13 @@ figure10 =
 also_narrow :: Expr ('Evaluated 'T)
 also_narrow =
   Lex Mary's_parents `AppL` -- Mary's parents believe
-  (Lex Believes `AppR` (Eval (Lex Mary `AppL` (Lex Also `AppR` Lex In_bed)))) -- Mary is in bed
+  (Lex Believes `AppR` (Eval (Lex Mary `AppL` (Lex Also `AppR` Lex In_bed)))) -- Mary also is in bed
 
 also_wide :: Expr ('Evaluated 'T)
 also_wide =
-  Lex Mary `AppL` (Lex Also `AppR` Lex In_bed) -- Mary is in bed
+  Lex Mary `AppL` (Lex Also `AppR` Lex In_bed) -- Mary also is in bed
   `Scope2` Bind 1 TW
   (Lex Mary's_parents `AppL` (Lex Believes `AppR` (Eval (Lift (Trace TW 1))))) -- Mary's parents believe trace
+
+-- >>> also_narrow
+-- [ Mary's parents [ believes [↓ [ Mary [ also is in bed ] ] ] ] ]
