@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -58,7 +59,7 @@ if' :: γ ⊢ (('I ⟶ 'Maybe ('I ⟶ 'Te.T)) ⟶
              'I ⟶ 'Maybe 'Te.T)
 if' = Lam (Lam (Lam (Con ImpM @@ (eval1 (Var (Weaken (Weaken Get))) @@ Var Get)
                      @@ (eval1 (Var (Weaken Get)) @@ Var Get))))
-      
+
 -- | monadic stuff
 
 bind0 :: γ ⊢ 'Maybe α -> γ ⊢ (α ⟶ 'Maybe β) -> γ ⊢ 'Maybe β
@@ -145,5 +146,5 @@ interpExpr g = \case
         ieg = interpExpr g
 
 -- >>> :set -XLambdaCase -XEmptyCase
--- >>> interpExpr (\case) reconstruction_example
--- (λx.(match (λy.[(λz.(match (λu.(ιv : (suit(v)(u) ∧ have(v)(t)(u))))(z) with [u] => (λv.(λw.(λx1.[bring(w)(t)]))(v)(z))(u); # => #))])(x) with [y] => (λz.(λu.(λv.(λw.(λx1.((λy1.(match v(y1) with [z1] => [z1(y1)]; # => #))(x1) ⇒ (λy1.(match w(y1) with [z1] => [z1(y1)]; # => #))(x1)))))(λv.[bro(t)])(u))(z)(x))(y); # => #))
+-- >>> betaReduce $ interpExpr (\case) reconstruction_example
+-- (λx.([bro(t)(x)] ⇒ (match (match (ιy : (suit(y)(x) ∧ have(y)(t)(x))) with [y] => [bring(y)(t)]; # => #) with [y] => [y(x)]; # => #)))
