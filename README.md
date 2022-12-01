@@ -1,8 +1,8 @@
 # semprag-ppsp
 
 Code for the paper [Presupposition projection as a scope
-phenomenon](https://ling.auf.net/lingbuzz/006801). Examples from the paper
-appear in
+phenomenon](https://semprag.org/index.php/sp/article/view/sp.15.15). Examples
+from the paper appear in
 [Examples.hs](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Examples.hs):
 [Figure 5,
 p. 18](https://github.com/juliangrove/semprag-ppsp/blob/main/src/Examples.hs#L30-L34),
